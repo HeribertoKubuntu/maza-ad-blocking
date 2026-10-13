@@ -4,11 +4,19 @@
 set -e
 
 # VARIABLES
-URL_DNS_LIST="https://raw.githubusercontent.com/StevenBlack/hosts/refs/heads/master/hosts"
+URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
-[[ -z "${XDG_CONFIG_HOME}" ]] && CONFIG="$HOME/.maza/" || CONFIG="$XDG_CONFIG_HOME/maza/"
+
+# CORRECCIÓN: Obtener el directorio HOME del usuario real, incluso si se usa sudo
+if [ -n "$SUDO_USER" ]; then
+    REAL_HOME=$(eval echo ~$SUDO_USER)
+else
+    REAL_HOME=$HOME
+fi
+
+[[ -z "${XDG_CONFIG_HOME}" ]] && CONFIG="$REAL_HOME/.maza/" || CONFIG="$XDG_CONFIG_HOME/maza/"
 HOST_FILE=/etc/hosts
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
