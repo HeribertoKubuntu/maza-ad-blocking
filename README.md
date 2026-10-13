@@ -48,6 +48,17 @@ sudo maza start
 sudo maza stop
 ```
 
+### 🔨 Autostart
+
+``` bash
+sudo maza autostart
+```
+### 🔨 Disable Autostart
+
+``` bash
+sudo maza disableautostart
+```
+
 ### ⚖️ Status
 
 ``` bash
@@ -65,7 +76,7 @@ maza status
 Then you do this.
 
 ``` bash
-curl -o maza https://raw.githubusercontent.com/tanrax/maza-ad-blocking/master/maza && chmod +x maza && sudo mv maza /usr/local/bin
+curl -o maza https://raw.githubusercontent.com/HeribertoKubuntu/maza-ad-blocking/refs/heads/master/maza && chmod +x maza && sudo mv maza /usr/local/bin
 ```
 
 Optional but recommended, make a backup of your hosts file.
@@ -94,15 +105,15 @@ Add the following line at the end.
 sudo rm /usr/local/bin/maza && sudo rm -r ~/.maza
 ```
 
-## 🚫 Not blocking certain domains
+## ✅ Not blocking certain domains
 
-Create a file named `ignore` inside the Maza configuration folder.
+1. Create a file named `ignore` inside the Maza configuration folder.
 
 ``` bash
 touch ~/.maza/ignore
 ```
 
-Edit the file for all domains that you do not want to ignore with a line break.
+2.- Edit the file for all domains that you do not want to ignore with a line break.
 
 Example:
 
@@ -111,7 +122,30 @@ ads-twitter.com
 ads.twitter.com
 ```
 
-Finally update Maza to apply the changes.
+3.- Finally update Maza to apply the changes.
+
+``` bash
+maza update
+```
+
+## 🚫 blocking certain domains
+
+1. Create a file named `blocking` inside the Maza configuration folder.
+
+``` bash
+touch ~/.maza/blocking
+```
+
+2.- Edit the file for all domains that you do not want to ignore with a line break.
+
+Example:
+
+``` txt
+ads-twitter.com
+ads.twitter.com
+```
+
+3.- Finally update Maza to apply the changes.
 
 ``` bash
 maza update
