@@ -303,6 +303,60 @@ If you want all your `.localhost` domains, for example, point to localhost add i
 address=/.localhost/127.0.0.1
 ```
 
+### Configuring Maza as a launch daemon on macOS.
+Launch Daemon Configuration
+
+- Create a file
+
+```
+sudo nano /Library/LaunchDaemons/com.maza.start.plist
+```
+
+- COPY/PASTE this on file "com.maza.start.plist" and save with ctrl + o + enter
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.maza.start</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/maza</string>
+        <string>start</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardErrorPath</key>
+    <string>/tmp/maza.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/maza.out</string>
+</dict>
+</plist>
+```
+
+- Add this to terminal
+```
+# First step
+# Asignar el propietario correcto (root)
+sudo chown root:wheel /Library/LaunchDaemons/com.maza.start.plist
+
+# Second step
+# Restringir los permisos de escritura
+sudo chmod 644 /Library/LaunchDaemons/com.maza.start.plist
+
+# Third step
+# Cargar y activar el servicio de inmediato
+sudo launchctl load -w /Library/LaunchDaemons/com.maza.start.plist
+
+```
+
+If you want revert, just delete the file, Done!
+
+´´´
+sudo rm /Library/LaunchDaemons/com.maza.start.plist
+´´´
+
 ## 🍓 CREATE YOUR OWN PI-HOLE SERVER WITH MAZA
 
 You can easily create your own DNS server on a Raspberry Pi, VPS or wherever you want, to connect your devices in just 10 commands thanks to Maza. Follow the [tutorial](https://programadorwebvalencia.com/create-your-own-pi-hole-with-10-commands/).
