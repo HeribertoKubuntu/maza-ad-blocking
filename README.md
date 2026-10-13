@@ -1,14 +1,8 @@
-## 🥇 Maza was Top 1 in Hacker News
-
-Comments: https://news.ycombinator.com/item?id=22717650
+## This is an Fork project
+Click on link to see <a target="_blank" href="https://github.com/tanrax/maza-ad-blocking">Maza Original Post</a> 
+🧑‍🎨 Credits <a target="_blank" href="https://andros.dev/">Andros Fenollosa</a> 
 
 <img alt="banner" src="media/banner.png" width="100%">
-
-## A command to squash all ads in all browsers
-
-```shell
-sudo maza start
-```
 
 Like Pi-hole but local and using your operating system.
 
@@ -20,60 +14,23 @@ Simple, native and efficient **local ad blocker**. Bash script compatible with *
 - You update the list of DNS to be blocked with a **single command** 😎.
 - Pure **Opensource** ❤️.
 
+## Before and After Maza
+- Preview
 <img alt="demo" src="media/demov2.jpg">
 
 ## Help me continue to improve
 
 <p align="center">
-  <a href='https://ko-fi.com/androsfenollosa' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+  <a href='https://ko-fi.com/heryxin' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi2.png?v=2' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
 </p>
 
-## 📟 Commands
-
-### 📡 Update database
-
-``` bash
-maza update
-```
-
-### 🔨 Start
-
-``` bash
-sudo maza start
-```
-
-### 🛠 Stop
-
-``` bash
-sudo maza stop
-```
-
-### 🔨 Autostart
-
-``` bash
-sudo maza autostart
-```
-### 🔨 Disable Autostart
-
-``` bash
-sudo maza disableautostart
-```
-
-### ⚖️ Status
-
-``` bash
-maza status
-```
-
-## ⚙️ Install
-
-### 😥 Requirements
+## 📋 Requirements
 
 - **bash** 4.0 or higher
 - **curl**
-- Only macOS users, **gsed**: `brew install gnu-sed`
+- macOS users, **gsed**: `brew install gnu-sed`
 
-Then you do this.
+## ⚙️ How to Install
 
 ``` bash
 curl -o maza https://raw.githubusercontent.com/HeribertoKubuntu/maza-ad-blocking/refs/heads/master/maza && chmod +x maza && sudo mv maza /usr/local/bin
@@ -85,58 +42,40 @@ Optional but recommended, make a backup of your hosts file.
 sudo cp /etc/hosts /etc/hosts.backup
 ```
 
-## 🤖 Auto update of domains to be blocked
+## 📟 Commands List
+|Command            |Description|
+|:-----------------:|:-----------------------------------:|
+|status             |Check if it's active or not          |
+|update             |Update the list of DNS to be blocked |
+|start              |Activate blocking DNS                |
+|stop               |Stop blocking DNS                    |
+|autostart          |Create a "plist" to run on startup   |
+|disableautostart   |Delete "plist"                       |
+|--help             |Display this usage message and exit  |
 
-Open your `cron`.
+### Example of execution 
 
-``` bash
-crontab -e
-```
-
-Add the following line at the end.
-
-```
-@daily maza update
-```
-
-## 🔪 Uninstall
-
-``` bash
-sudo rm /usr/local/bin/maza && sudo rm -r ~/.maza
-```
-
-## ✅ Not blocking certain domains
-
-1. Create a file named `ignore` inside the Maza configuration folder.
-
-``` bash
-touch ~/.maza/ignore
-```
-
-2.- Edit the file for all domains that you do not want to ignore with a line break.
-
-Example:
-
-``` txt
-ads-twitter.com
-ads.twitter.com
-```
-
-3.- Finally update Maza to apply the changes.
+- Update database
 
 ``` bash
 maza update
 ```
 
-## 🚫 blocking certain domains
-
-1. Create a file named `blocking` inside the Maza configuration folder.
+- Start
 
 ``` bash
-touch ~/.maza/blocking
+maza start
 ```
 
-2.- Edit the file for all domains that you do not want to ignore with a line break.
+## ✅ Ignore domains
+
+#### 1. Create a file named `ignore` inside the Maza configuration folder.
+
+``` bash
+touch ~/.maza/ignore
+```
+
+#### 2.- Edit the file for all domains that you do not want to ignore with a line break.
 
 Example:
 
@@ -145,7 +84,30 @@ ads-twitter.com
 ads.twitter.com
 ```
 
-3.- Finally update Maza to apply the changes.
+#### 3.- Finally update Maza to apply the changes.
+
+``` bash
+maza update
+```
+
+## 🚫 blocking domains
+
+#### 1. Create a file named `blocking` inside the Maza configuration folder.
+
+``` bash
+touch ~/.maza/blocking
+```
+
+#### 2.- Edit the file for all domains that you do not want to ignore with a line break.
+
+Example:
+
+``` txt
+ads-twitter.com
+ads.twitter.com
+```
+
+#### 3.- Finally update Maza to apply the changes.
 
 ``` bash
 maza update
@@ -173,23 +135,21 @@ Unfortunately the hosts file does **not support sub-domains (wildcards)**, which
 
 [MacOS](#MacOS)
 
-[Linux](#user-content-linux-debianubuntu)
-
 ### MacOS
 
-#### 0 Update Maza
+- Update Maza
 
 ```bash
 maza update
 ```
 
-#### 1 Install
+- Install
 
 ```bash
 brew install dnsmasq
 ```
 
-#### 2 Configure
+- Configure
 
 Edit the file.
 
@@ -203,20 +163,20 @@ Add the following line at the end.
 conf-file=(your user path)/.maza/dnsmasq.conf
 ```
 
-Example
+- Example
 
 ```
 conf-file=/Users/myuser/.maza/dnsmasq.conf
 ```
 
-Start DNSMASQ.
+- Start DNSMASQ
 
 ```bash
 sudo brew services stop dnsmasq
 sudo brew services start dnsmasq
 ```
 
-#### 3 Tell your OS to use your DNS server
+- Tell your OS to use your DNS server
 
 Delete the list of macOS DNS servers and add the 3 addresses. The first one will be your local server, and the other 2 belong to OpenDNS, which you can use any other.
 
@@ -228,98 +188,20 @@ Delete the list of macOS DNS servers and add the 3 addresses. The first one will
 
 <img alt="network macos" src="media/network-osx.jpg" width="500">
 
-Refresh your DNS cache
+- Refresh your DNS cache
 
 ```bash
 sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
 ```
 
-#### 4 Restart/Start Maza
+- Restart/Start Maza
 
 ```bash
 sudo maza stop
 sudo maza start
 ```
 
-### Linux (Debian/Ubuntu)
-
-#### 0 Update Maza
-
-```bash
-maza update
-```
-
-#### 1 Install
-
-```bash
-sudo apt update
-sudo apt install dnsmasq
-```
-
-#### 2 Configure
-
-Edit file in path.
-
-```
-/etc/dnsmasq.conf
-```
-
-Add the following line at the end.
-
-```
-conf-file=(your user path)/.maza/dnsmasq.conf
-```
-
-Example
-
-```
-conf-file=/home/myuser/.maza/dnsmasq.conf
-```
-
-Start DNSMASQ.
-
-```bash
-sudo systemctl stop dnsmasq
-sudo systemctl start dnsmasq
-sudo systemctl enable dnsmasq
-```
-
-#### 3 Tell your OS to use your DNS server
-
-##### 3.1 Gnome Shell
-
-In Gnome Shell, open `Settings->Nework`. Click in your connection.
-
-<img alt="network gnome" src="media/network-gnome.png" width="500">
-
-Add your local server (dnsmasq), and the other 2 belong to OpenDNS, which you can use any other.
-
-```bash
-127.0.0.1,208.67.222.222,208.67.220.220
-```
-
-<img alt="gnome dns" src="media/dns-gnome.png" width="500">
-
-##### 3.2 KDE Plasma
-
-In KDE Plasma, open `Settings->Nework->Connectios`. Click in your connection and tab `ip4`.
-
-- `Method`: Automatic (Only addresses).
-
-Add your local server (dnsmasq), and the other 2 belong to OpenDNS, which you can use any other.
-
-- `DNS Servers`: `127.0.0.1,208.67.222.222,208.67.220.220`.
-
-<img alt="kde dns" src="media/dns-kde.png" width="100%">
-
-#### 4 Restart/Start Maza
-
-```bash
-sudo maza stop
-sudo maza start
-```
-
-### Bonus: dnsmasq is in charge of solving all DNS
+## Bonus: dnsmasq is in charge of solving all DNS
 
 Add in configure file: `/usr/local/etc/dnsmasq.conf`
 
@@ -329,6 +211,14 @@ server=208.67.222.222
 server=208.67.220.220
 ```
 
+## 🔪 Uninstall
+Easy uninstallation just copy/paste this command on terminnal
+
+``` bash
+sudo rm /usr/local/bin/maza && sudo rm -r ~/.maza
+```
+
+## Optionals
 ### Bonus: dnsmasq have `localhost` domains
 
 If you want all your `.localhost` domains, for example, point to localhost add in configure file: `/usr/local/etc/dnsmasq.conf` or `/etc/dnsmasq.conf`.
@@ -337,69 +227,20 @@ If you want all your `.localhost` domains, for example, point to localhost add i
 address=/.localhost/127.0.0.1
 ```
 
-### Bonus: Configuring Maza as a launch daemon on macOS.
-Launch Daemon Configuration
+### 🤖 Auto update of domains to be blocked
 
-- Create a file
+Open your `cron`.
 
-```
-sudo nano /Library/LaunchDaemons/com.maza.start.plist
-```
-
-- COPY/PASTE this on file "com.maza.start.plist" and save with ctrl + o and hit enter
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
-<plist version="1.0">
-<dict>
-    <key>Label</key>
-    <string>com.maza.start</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/usr/local/bin/maza</string>
-        <string>start</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
-    <key>StandardErrorPath</key>
-    <string>/tmp/maza.err</string>
-    <key>StandardOutPath</key>
-    <string>/tmp/maza.out</string>
-</dict>
-</plist>
+``` bash
+crontab -e
 ```
 
-- Add this to terminal
-```
-# First step
-# Asignar el propietario correcto (root)
-sudo chown root:wheel /Library/LaunchDaemons/com.maza.start.plist
-
-# Second step
-# Restringir los permisos de escritura
-sudo chmod 644 /Library/LaunchDaemons/com.maza.start.plist
-
-# Third step
-# Cargar y activar el servicio de inmediato
-sudo launchctl load -w /Library/LaunchDaemons/com.maza.start.plist
+Add the following line at the end.
 
 ```
-
-If you want revert, just delete the file, Done!
-
+@daily maza update
 ```
-sudo rm /Library/LaunchDaemons/com.maza.start.plist
-```
-
-## 🍓 CREATE YOUR OWN PI-HOLE SERVER WITH MAZA
-
-You can easily create your own DNS server on a Raspberry Pi, VPS or wherever you want, to connect your devices in just 10 commands thanks to Maza. Follow the [tutorial](https://programadorwebvalencia.com/create-your-own-pi-hole-with-10-commands/).
-
 
 ## ⚠️ CAUTION
 
 Remember to make a backup copy of `/etc/hosts` in case of unforeseen circumstances, neither the project nor its author will be responsible for any possible repercussions derived from not carrying out this action.
-
-## 🧑‍🎨 Credits
-
-<a target="_blank" href="https://andros.dev/">Andros Fenollosa</a>
