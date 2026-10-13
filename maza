@@ -4,11 +4,11 @@
 set -e
 
 # VARIABLES
-URL_DNS_LIST="https://pgl.yoyo.org/adservers/serverlist.php?showintro=0&mimetype=plaintext"
+URL_DNS_LIST="https://raw.githubusercontent.com/StevenBlack/hosts/refs/heads/master/hosts"
 NAME_OSX="Darwin"
 THIS_OS=$(uname -mrs)
 PROGNAME=$(basename "$0")
-[[ -z "${XDG_CONFIG_HOME}" ]] && CONFIG=$HOME/.maza/ || CONFIG=$XDG_CONFIG_HOME/maza
+[[ -z "${XDG_CONFIG_HOME}" ]] && CONFIG="$HOME/.maza/" || CONFIG="$XDG_CONFIG_HOME/maza/"
 HOST_FILE=/etc/hosts
 COLOR_RED=$(tput setaf 1)
 COLOR_GREEN=$(tput setaf 2)
@@ -16,11 +16,20 @@ COLOR_RESET=$(tput sgr0)
 LIST="list"
 LIST_DNSMASQ="dnsmasq.conf"
 IGNORE_LIST_FILE="ignore"
+ADDING_LIST_FILE="blocking"
 START_TAG="## MAZA - List ad blocking"
 PROJECT="### https://github.com/tanrax/maza-ad-blocking"
 AUTHOR="### Created by Andros Fenollosa (https://andros.dev/)"
 END_TAG="## END MAZA"
 
+# PASO 2: INICIALIZACIÓN EN LA PRIMERA EJECUCIÓN
+if [ ! -d "$CONFIG" ]; then
+    mkdir -p "$CONFIG"
+    touch "$CONFIG/$ADDING_LIST_FILE"
+    touch "$CONFIG/$IGNORE_LIST_FILE"
+    echo "address=/.localhost/127.0.0.1" > "$CONFIG/$LIST_DNSMASQ"
+    echo "${COLOR_GREEN}Primera ejecución detectada. Directorio de configuración creado en $CONFIG${COLOR_RESET}"
+fi
 
 # Create sed cross system
 custom-sed() {
@@ -39,7 +48,6 @@ custom-sed() {
 }
 export -f custom-sed
 
-
 # FUNCTIONS
 
 ## HELP
@@ -53,11 +61,13 @@ Usage: $PROGNAME [OPTION]
 Simple and efficient local ad blocking throughout the network.
 
 Options:
-status       Check if it's active or not
-update       Update the list of DNS to be blocked
-start        Activate blocking DNS.
-stop         Stop blocking DNS.
---help       Display this usage message and exit
+  status             Check if it's active or not
+  update             Update the list of DNS to be blocked
+  start              Activate blocking DNS.
+  stop               Stop blocking DNS.
+  autostart          Enable autostart on system boot (macOS).
+  disableautostart   Disable and remove autostart service.
+  --help             Display this usage message and exit
 EOF
 
     exit 1
@@ -87,27 +97,45 @@ update() {
     custom-sed -i.bak 's/127.0.0.1 /address=\//g' "$CONFIG$LIST_DNSMASQ"
     custom-sed -i.bak 's/$/\/127.0.0.1/g' "$CONFIG$LIST_DNSMASQ"
     ## Add start tag DNS list in first line
-    custom-sed -i.bak "1i\\$AUTHOR" "$CONFIG$LIST"
-    custom-sed -i.bak "1i\\$PROJECT" "$CONFIG$LIST"
-    custom-sed -i.bak "1i\\$START_TAG" "$CONFIG$LIST"
-    ## Add end tag DNS list in first line
-    echo "$END_TAG" >> "$CONFIG/$LIST"
-    ## Add start tag DNS dnsmasq in first line
-    custom-sed -i.bak "1i\\$AUTHOR" "$CONFIG$LIST_DNSMASQ"
-    custom-sed -i.bak "1i\\$PROJECT" "$CONFIG$LIST_DNSMASQ"
-    custom-sed -i.bak "1i\\$START_TAG" "$CONFIG$LIST_DNSMASQ"
-    ## Add end tag DNS DNSMASQ in first line
-    echo "$END_TAG" >> "$CONFIG$LIST_DNSMASQ"
+    custom-sed -i.bak "1i$AUTHOR" "$CONFIG$LIST"
+    custom-sed -i.bak "1i$PROJECT" "$CONFIG$LIST"
+    custom-sed -i.bak "1i$START_TAG" "$CONFIG$LIST"
+    
     # Remove the domains to ignore. They are located in ".maza/ignore"
     if [ -f "$CONFIG/$IGNORE_LIST_FILE" ]; then
-	while IFS= read -r domain; do
-	    custom-sed -i.bak "/$domain/d" "$CONFIG$LIST"
-	    custom-sed -i.bak "/$domain/d" "$CONFIG$LIST_DNSMASQ"
-	done < "$CONFIG/$IGNORE_LIST_FILE"
+        while IFS= read -r domain || [ -n "$domain" ]; do
+            domain="${domain//$'\r'/}" # Soporta saltos de línea de Windows
+            [[ -z "$domain" || "$domain" =~ ^[[:space:]]*# ]] && continue
+            custom-sed -i.bak "/$domain/d" "$CONFIG$LIST"
+            custom-sed -i.bak "/$domain/d" "$CONFIG$LIST_DNSMASQ"
+        done < "$CONFIG/$IGNORE_LIST_FILE"
     fi
+
+    # PASO 1: Añadir dominios personalizados a bloquear. Ubicados en ".maza/blocking"
+    if [ -f "$CONFIG/$ADDING_LIST_FILE" ]; then
+        while IFS= read -r domain || [ -n "$domain" ]; do
+            domain="${domain//$'\r'/}" # Soporta saltos de línea de Windows
+            [[ -z "$domain" || "$domain" =~ ^[[:space:]]*# ]] && continue
+            echo "127.0.0.1 $domain" >> "$CONFIG$LIST"
+            echo "address=/$domain/127.0.0.1" >> "$CONFIG$LIST_DNSMASQ"
+        done < "$CONFIG/$ADDING_LIST_FILE"
+    fi
+
+    # Asegurar que el bloqueo de sub-dominios localhost persista tras cada actualización
+    echo "address=/.localhost/127.0.0.1" >> "$CONFIG$LIST_DNSMASQ"
+
+    ## Add end tag DNS list
+    echo "$END_TAG" >> "$CONFIG/$LIST"
+    ## Add start tag DNS dnsmasq
+    custom-sed -i.bak "1i$AUTHOR" "$CONFIG$LIST_DNSMASQ"
+    custom-sed -i.bak "1i$PROJECT" "$CONFIG$LIST_DNSMASQ"
+    custom-sed -i.bak "1i$START_TAG" "$CONFIG$LIST_DNSMASQ"
+    ## Add end tag DNS DNSMASQ
+    echo "$END_TAG" >> "$CONFIG$LIST_DNSMASQ"
+    
     # Remove temp file
-    rm "$CONFIG$LIST.bak"
-    rm "$CONFIG$LIST_DNSMASQ.bak"
+    rm -f "$CONFIG$LIST.bak"
+    rm -f "$CONFIG$LIST_DNSMASQ.bak"
     # Notify user
     echo "${COLOR_GREEN}List updated!${COLOR_RESET}"
 }
@@ -129,6 +157,45 @@ stop() {
 
     # Notify user
     echo "${COLOR_GREEN}DISABLED!${COLOR_RESET}"
+}
+
+# PASO 3: Funciones de Autostart para macOS
+autostart() {
+    echo "Configurando el inicio automático (autostart)..."
+    sudo mkdir -p /Library/LaunchDaemons
+    cat << 'EOF' | sudo tee /Library/LaunchDaemons/com.maza.start.plist > /dev/null
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.maza.start</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/maza</string>
+        <string>start</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardErrorPath</key>
+    <string>/tmp/maza.err</string>
+    <key>StandardOutPath</key>
+    <string>/tmp/maza.out</string>
+</dict>
+</plist>
+EOF
+    sudo chown root:wheel /Library/LaunchDaemons/com.maza.start.plist
+    sudo chmod 644 /Library/LaunchDaemons/com.maza.start.plist
+    sudo launchctl load -w /Library/LaunchDaemons/com.maza.start.plist
+    echo "${COLOR_GREEN}¡Autostart habilitado y cargado correctamente!${COLOR_RESET}"
+}
+
+disableautostart() {
+    echo "Deshabilitando el inicio automático (autostart)..."
+    # Se descarga el servicio primero para evitar advertencias del sistema antes de borrar el archivo
+    sudo launchctl unload -w /Library/LaunchDaemons/com.maza.start.plist 2>/dev/null || true
+    sudo rm -f /Library/LaunchDaemons/com.maza.start.plist
+    echo "${COLOR_GREEN}¡Autostart deshabilitado y eliminado correctamente!${COLOR_RESET}"
 }
 
 # CONTROLE ARGUMENTS
@@ -155,11 +222,21 @@ while [ $# -gt 0 ] ; do
         isArg="1"
         stop
         ;;
+    autostart)
+        isArg="1"
+        autostart
+        ;;
+    disableautostart)
+        isArg="1"
+        disableautostart
+        ;;
     *)
+        usage "Unknown option: $1"
+        ;;
     esac
     shift
 done
 
-if [ -z $isArg ] ; then
+if [ -z "$isArg" ] ; then
     usage "Not enough arguments"
 fi
