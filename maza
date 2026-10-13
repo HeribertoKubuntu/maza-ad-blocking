@@ -89,8 +89,9 @@ update() {
     # Download DNS list
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     # Clear list
-    ## Remove comments
+    ## Remove comments AND empty lines
     custom-sed -i.bak '/^#/ d' "$CONFIG$LIST"
+    custom-sed -i.bak '/^[[:space:]]*$/ d' "$CONFIG$LIST"  # ← NUEVA LÍNEA: elimina líneas vacías
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
