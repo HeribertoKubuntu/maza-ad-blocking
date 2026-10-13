@@ -303,7 +303,7 @@ If you want all your `.localhost` domains, for example, point to localhost add i
 address=/.localhost/127.0.0.1
 ```
 
-### Configuring Maza as a launch daemon on macOS.
+### Bonus: Configuring Maza as a launch daemon on macOS.
 Launch Daemon Configuration
 
 - Create a file
@@ -312,7 +312,7 @@ Launch Daemon Configuration
 sudo nano /Library/LaunchDaemons/com.maza.start.plist
 ```
 
-- COPY/PASTE this on file "com.maza.start.plist" and save with ctrl + o + enter
+- COPY/PASTE this on file "com.maza.start.plist" and save with ctrl + o and hit enter
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://apple.com">
@@ -353,9 +353,9 @@ sudo launchctl load -w /Library/LaunchDaemons/com.maza.start.plist
 
 If you want revert, just delete the file, Done!
 
-´´´
+```
 sudo rm /Library/LaunchDaemons/com.maza.start.plist
-´´´
+```
 
 ## 🍓 CREATE YOUR OWN PI-HOLE SERVER WITH MAZA
 
