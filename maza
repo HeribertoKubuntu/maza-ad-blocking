@@ -89,14 +89,19 @@ update() {
     # Download DNS list
     curl -L -s "$URL_DNS_LIST" -o "$CONFIG$LIST"
     # Clear list
-    ## Remove comments AND empty lines
+    ## Remove comments
     custom-sed -i.bak '/^#/ d' "$CONFIG$LIST"
-    custom-sed -i.bak '/^[[:space:]]*$/ d' "$CONFIG$LIST"  # ← NUEVA LÍNEA: elimina líneas vacías
+    ## Remove empty lines
+    custom-sed -i.bak '/^[[:space:]]*$/ d' "$CONFIG$LIST"
+    ## Remove lines that don't start with "127.0.0.1 " (for dnsmasq processing)
+    custom-sed -i.bak '/^127\.0\.0\.1 /! d' "$CONFIG$LIST"
+    
     # Make dnsmasq format
     ## 127.0.0.1 doubleclick.net to address=/doubleclick.net/127.0.0.1
     cp "$CONFIG$LIST" "$CONFIG$LIST_DNSMASQ"
     custom-sed -i.bak 's/127.0.0.1 /address=\//g' "$CONFIG$LIST_DNSMASQ"
     custom-sed -i.bak 's/$/\/127.0.0.1/g' "$CONFIG$LIST_DNSMASQ"
+    
     ## Add start tag DNS list in first line
     custom-sed -i.bak "1i$AUTHOR" "$CONFIG$LIST"
     custom-sed -i.bak "1i$PROJECT" "$CONFIG$LIST"
@@ -105,24 +110,24 @@ update() {
     # Remove the domains to ignore. They are located in ".maza/ignore"
     if [ -f "$CONFIG/$IGNORE_LIST_FILE" ]; then
         while IFS= read -r domain || [ -n "$domain" ]; do
-            domain="${domain//$'\r'/}" # Soporta saltos de línea de Windows
+            domain="${domain//$'\r'/}"
             [[ -z "$domain" || "$domain" =~ ^[[:space:]]*# ]] && continue
             custom-sed -i.bak "/$domain/d" "$CONFIG$LIST"
             custom-sed -i.bak "/$domain/d" "$CONFIG$LIST_DNSMASQ"
         done < "$CONFIG/$IGNORE_LIST_FILE"
     fi
 
-    # PASO 1: Añadir dominios personalizados a bloquear. Ubicados en ".maza/blocking"
+    # PASO 1: Añadir dominios personalizados a bloquear
     if [ -f "$CONFIG/$ADDING_LIST_FILE" ]; then
         while IFS= read -r domain || [ -n "$domain" ]; do
-            domain="${domain//$'\r'/}" # Soporta saltos de línea de Windows
+            domain="${domain//$'\r'/}"
             [[ -z "$domain" || "$domain" =~ ^[[:space:]]*# ]] && continue
             echo "127.0.0.1 $domain" >> "$CONFIG$LIST"
             echo "address=/$domain/127.0.0.1" >> "$CONFIG$LIST_DNSMASQ"
         done < "$CONFIG/$ADDING_LIST_FILE"
     fi
 
-    # Asegurar que el bloqueo de sub-dominios localhost persista tras cada actualización
+    # Asegurar que el bloqueo de sub-dominios localhost persista
     echo "address=/.localhost/127.0.0.1" >> "$CONFIG$LIST_DNSMASQ"
 
     ## Add end tag DNS list
